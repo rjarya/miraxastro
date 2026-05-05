@@ -1,0 +1,88 @@
+// AstroSeva — Firestore Security Rules
+// Deploy: firebase deploy --only firestore:rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ───────────────────────────────────────
+    function isAuth() { return request.auth != null; }
+    function isOwner(uid) { return request.auth.uid == uid; }
+    function isAdmin() {
+      return isAuth() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    function isAstrologer() {
+      return isAuth() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'astrologer';
+    }
+
+    // ── Users ──────────────────────────────────────────────────
+    match /users/{userId} {
+      allow read: if isAuth() && (isOwner(userId) || isAdmin());
+      allow create: if isAuth() && isOwner(userId);
+      allow update: if isAuth() && (isOwner(userId) || isAdmin());
+      allow delete: if isAdmin();
+
+      match /transactions/{txnId} {
+        allow read: if isAuth() && (isOwner(userId) || isAdmin());
+        allow create: if isAuth() && isOwner(userId);
+        allow update, delete: if isAdmin();
+      }
+    }
+
+    // ── Astrologers ────────────────────────────────────────────
+    match /astrologers/{astrologerId} {
+      allow read: if true;  // public profiles
+      allow create: if isAuth();
+      allow update: if isAuth() && (isOwner(astrologerId) || isAdmin());
+      allow delete: if isAdmin();
+
+      match /reviews/{reviewId} {
+        allow read: if true;
+        allow create: if isAuth();
+        allow update, delete: if isAdmin();
+      }
+
+      match /earnings/{earningId} {
+        allow read: if isAuth() && (isOwner(astrologerId) || isAdmin());
+        allow create, update: if isAdmin();
+      }
+    }
+
+    // ── Sessions ───────────────────────────────────────────────
+    match /sessions/{sessionId} {
+      allow read: if isAuth() && (
+        resource.data.customerId == request.auth.uid ||
+        resource.data.astrologerId == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if isAuth();
+      allow update: if isAuth() && (
+        resource.data.customerId == request.auth.uid ||
+        resource.data.astrologerId == request.auth.uid ||
+        isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // ── Revenue (admin only) ───────────────────────────────────
+    match /revenue/{docId} {
+      allow read, write: if isAdmin();
+    }
+
+    // ── Withdrawal requests ────────────────────────────────────
+    match /withdrawals/{wId} {
+      allow read: if isAuth() && (
+        resource.data.astrologerId == request.auth.uid || isAdmin()
+      );
+      allow create: if isAstrologer();
+      allow update: if isAdmin();
+    }
+
+    // ── Notifications ──────────────────────────────────────────
+    match /notifications/{userId}/{notifId} {
+      allow read, write: if isAuth() && isOwner(userId);
+    }
+  }
+}
