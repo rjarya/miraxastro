@@ -99,6 +99,19 @@ const MOCK={
 const ASTRO={
   today:4680,week:28600,month:92400,total:420500,pending:12600,withdrawn:407900,rate:25,
   sessions:{today:6,week:36,month:112},
+  users:[
+    {id:"u1",name:"Priya Sharma",email:"priya@email.com",phone:"+61 412 345 678",country:"Australia",joined:"12 Jan 2025",sessions:8,coins:240,status:"active",reports:0},
+    {id:"u2",name:"Ravi Kumar",email:"ravi@email.com",phone:"+91 98765 43210",country:"India",joined:"18 Feb 2025",sessions:14,coins:0,status:"active",reports:1},
+    {id:"u3",name:"James Mitchell",email:"james@email.com",phone:"+1 (415) 234-5678",country:"USA",joined:"3 Mar 2025",sessions:3,coins:150,status:"active",reports:0},
+    {id:"u4",name:"Anita Patel",email:"anita@email.com",phone:"+44 7911 123456",country:"UK",joined:"22 Mar 2025",sessions:21,coins:80,status:"active",reports:0},
+    {id:"u5",name:"Wei Chen",email:"wei@email.com",phone:"+65 8123 4567",country:"Singapore",joined:"5 Apr 2025",sessions:5,coins:320,status:"suspended",reports:3},
+    {id:"u6",name:"Sarah Johnson",email:"sarah@email.com",phone:"+61 423 456 789",country:"Australia",joined:"11 Apr 2025",sessions:2,coins:50,status:"active",reports:0},
+  ],
+  reports:[
+    {id:"r1",userId:"u2",userName:"Ravi Kumar",astrologer:"Dr. Priya Nair",reason:"Abusive language during session",details:"User was very rude and used inappropriate language when he did not like the reading.",time:"2h ago",status:"pending"},
+    {id:"r2",userId:"u5",userName:"Wei Chen",astrologer:"Pandit Rajesh Sharma",reason:"Spam and fake details",details:"User provided false birth details repeatedly and demanded refund aggressively.",time:"1 day ago",status:"pending"},
+    {id:"r3",userId:"u5",userName:"Wei Chen",astrologer:"Acharya Suresh Joshi",reason:"Threatening behaviour",details:"User made threatening comments after session ended.",time:"3 days ago",status:"reviewed"},
+  ],
   recentSessions:[
     {customer:"Priya R.",duration:"24 min",coins:600,earned:420,rating:5,time:"1h ago"},
     {customer:"Ravi S.",duration:"18 min",coins:450,earned:315,rating:4,time:"3h ago"},
@@ -118,34 +131,92 @@ function AdminPanel(){
   const [pending,setPending]=useState(MOCK.pendingAstros);
   const [withdrawals,setWithdrawals]=useState(MOCK.withdrawals);
   const [processing,setProcessing]=useState({});
+  const [users,setUsers]=useState(ASTRO.users);
+  const [reports,setReports]=useState(ASTRO.reports);
+  const [userSearch,setUserSearch]=useState("");
+  const [selectedReport,setSelectedReport]=useState(null);
+  const [showNotif,setShowNotif]=useState(false);
+  const [notifications,setNotifications]=useState([
+    {id:"n1",type:"report",title:"New Report - Ravi Kumar",body:"Dr. Priya Nair reported: Abusive language during session",time:"2h ago",read:false,reportId:"r1"},
+    {id:"n2",type:"report",title:"New Report - Wei Chen",body:"Pandit Rajesh Sharma reported: Spam and fake details",time:"1 day ago",read:false,reportId:"r2"},
+    {id:"n3",type:"astro",title:"New Astrologer Application",body:"Meena Krishnamurthy applied to join as Vedic Astrologer",time:"3h ago",read:true,reportId:null},
+  ]);
+  const [showMsgModal,setShowMsgModal]=useState(false);
+  const [msgUser,setMsgUser]=useState(null);
+  const [msgText,setMsgText]=useState("");
+  const [msgSent,setMsgSent]=useState(false);
   function toast$(m,t="ok"){setToast({m,t});setTimeout(()=>setToast(null),3000);}
+
+  function suspendUser(id){
+    setUsers(u=>u.map(x=>x.id===id?{...x,status:"suspended"}:x));
+    toast$("User suspended - access revoked","warn");
+  }
+  function reinstateUser(id){
+    setUsers(u=>u.map(x=>x.id===id?{...x,status:"active"}:x));
+    toast$("User reinstated - access restored");
+  }
+  function deleteUser(id){
+    setUsers(u=>u.filter(x=>x.id!==id));
+    toast$("User deleted - account removed","warn");
+  }
+  function blockUser(id){
+    setUsers(u=>u.map(x=>x.id===id?{...x,status:"blocked"}:x));
+    toast$("User blocked - login access revoked","warn");
+  }
+  function unblockUser(id){
+    setUsers(u=>u.map(x=>x.id===id?{...x,status:"active"}:x));
+    toast$("User unblocked - access restored");
+  }
+  function markAllRead(){
+    setNotifications(n=>n.map(x=>({...x,read:true})));
+  }
+  function addNotification(n){
+    setNotifications(p=>[{id:"n"+Date.now(),...n,read:false,time:"Just now"},...p]);
+  }
+  function openMsgModal(user){
+    setMsgUser(user);
+    setMsgText("");
+    setMsgSent(false);
+    setShowMsgModal(true);
+  }
+  function resolveReport(id){
+    setReports(r=>r.map(x=>x.id===id?{...x,status:"reviewed"}:x));
+    setNotifications(n=>n.map(x=>x.reportId===id?{...x,read:true}:x));
+    setSelectedReport(null);
+    toast$("Report marked as reviewed");
+  }
+  function dismissReport(id){
+    setReports(r=>r.filter(x=>x.id!==id));
+    setSelectedReport(null);
+    toast$("Report dismissed");
+  }
 
   async function approveAstro(id){
     setProcessing(p=>({...p,[id]:"approving"}));
     await new Promise(r=>setTimeout(r,1200));
     setPending(p=>p.filter(a=>a.id!==id));
     setProcessing(p=>({...p,[id]:null}));
-    toast$("Astrologer approved — profile now live!");
+    toast$("Astrologer approved - profile now live!");
   }
   async function rejectAstro(id){
     setProcessing(p=>({...p,[id]:"rejecting"}));
     await new Promise(r=>setTimeout(r,800));
     setPending(p=>p.filter(a=>a.id!==id));
     setProcessing(p=>({...p,[id]:null}));
-    toast$("Profile rejected — astrologer notified","warn");
+    toast$("Profile rejected - astrologer notified","warn");
   }
   async function processWithdrawal(id){
     setProcessing(p=>({...p,[id]:"paying"}));
     await new Promise(r=>setTimeout(r,1500));
     setWithdrawals(w=>w.map(x=>x.id===id?{...x,status:"processed"}:x));
     setProcessing(p=>({...p,[id]:null}));
-    toast$("Withdrawal processed — bank transfer initiated!");
+    toast$("Withdrawal processed - bank transfer initiated!");
   }
 
-  const TABS=[["overview","📊 Overview"],["astrologers","🔮 Astrologers"],["withdrawals","💰 Withdrawals"],["transactions","📋 Transactions"],["analytics","📈 Analytics"]];
+  const TABS=[["overview","📊 Overview"],["astrologers","🔮 Astrologers"],["users","👥 Users"],["reports","🚨 Reports"],["withdrawals","💰 Withdrawals"],["transactions","📋 Transactions"],["analytics","📈 Analytics"]];
 
   return(
-    <div style={{minHeight:"100vh",background:BG,fontFamily:"'Playfair Display',Georgia,serif",color:"#e8d5b7",position:"relative"}}>
+    <div style={{minHeight:"100vh",background:BG,fontFamily:"Georgia,serif",color:"#e8d5b7",position:"relative"}}>
       <style>{CSS}</style><Stars/>
       <div style={{position:"sticky",top:0,zIndex:100,background:"rgba(10,0,21,.95)",backdropFilter:"blur(20px)",borderBottom:"1px solid rgba(200,150,50,.2)",padding:"0 16px",display:"flex",alignItems:"center",justifyContent:"space-between",height:60}}>
         <div>
@@ -153,15 +224,55 @@ function AdminPanel(){
           <MXWordmark size={16}/></div>
           <div style={{fontSize:10,color:"#636e72",fontFamily:"sans-serif"}}>Super Admin · Stage 6</div>
         </div>
-        <div style={{display:"flex",gap:8,alignItems:"center"}}>
-          {pending.length>0&&<div style={{background:"rgba(255,71,87,.15)",border:"1px solid rgba(255,71,87,.3)",borderRadius:8,padding:"4px 10px",fontSize:11,color:"#ff4757",fontFamily:"sans-serif"}}>⚠ {pending.length} pending</div>}
+        <div style={{display:"flex",gap:10,alignItems:"center"}}>
+          {/* Bell notification icon */}
+          <div style={{position:"relative",cursor:"pointer"}} onClick={()=>setShowNotif(v=>!v)}>
+            <div style={{width:34,height:34,borderRadius:"50%",background:"rgba(255,255,255,.06)",border:"1px solid rgba(200,150,50,.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>
+              &#128276;
+            </div>
+            {notifications.filter(n=>!n.read).length>0&&(
+              <div style={{position:"absolute",top:-3,right:-3,width:16,height:16,borderRadius:"50%",background:"#ff4757",border:"2px solid #0a0015",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,fontWeight:700,color:"white",fontFamily:"sans-serif"}}>
+                {notifications.filter(n=>!n.read).length}
+              </div>
+            )}
+          </div>
           <div style={{width:30,height:30,borderRadius:"50%",background:"linear-gradient(135deg,#6c5ce7,#a29bfe)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontFamily:"sans-serif",fontWeight:700,color:"#fff"}}>A</div>
         </div>
+
+        {/* Notification dropdown */}
+        {showNotif&&(
+          <div style={{position:"absolute",top:65,right:14,width:320,background:"#0d0a1a",border:"1px solid rgba(200,150,50,.3)",borderRadius:14,zIndex:300,boxShadow:"0 8px 32px rgba(0,0,0,.8)",overflow:"hidden"}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 14px",borderBottom:"1px solid rgba(200,150,50,.15)"}}>
+              <div style={{fontSize:13,fontWeight:700,color:G,fontFamily:"sans-serif"}}>&#128276; Notifications</div>
+              <button onClick={markAllRead} style={{background:"none",border:"none",color:"#8a7a6a",fontFamily:"sans-serif",fontSize:11,cursor:"pointer"}}>Mark all read</button>
+            </div>
+            <div style={{maxHeight:360,overflowY:"auto"}}>
+              {notifications.length===0&&(
+                <div style={{padding:"20px",textAlign:"center",color:"#8a7a6a",fontFamily:"sans-serif",fontSize:12}}>No notifications</div>
+              )}
+              {notifications.map(n=>(
+                <div key={n.id} onClick={()=>{
+                  setNotifications(ns=>ns.map(x=>x.id===n.id?{...x,read:true}:x));
+                  if(n.reportId){setTab("reports");setShowNotif(false);}
+                  else if(n.type==="astro"){setTab("astrologers");setShowNotif(false);}
+                }} style={{padding:"12px 14px",borderBottom:"1px solid rgba(200,150,50,.07)",cursor:"pointer",background:n.read?"transparent":"rgba(255,71,87,.04)",display:"flex",gap:10,alignItems:"flex-start"}}>
+                  <div style={{width:8,height:8,borderRadius:"50%",background:n.read?"transparent":"#ff4757",flexShrink:0,marginTop:4}}/>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:12,fontWeight:n.read?400:700,color:"#e8d5b7",fontFamily:"sans-serif",marginBottom:2}}>{n.title}</div>
+                    <div style={{fontSize:11,color:"#8a7a6a",fontFamily:"sans-serif",lineHeight:1.5}}>{n.body}</div>
+                    <div style={{fontSize:10,color:"#636e72",fontFamily:"sans-serif",marginTop:3}}>{n.time}</div>
+                  </div>
+                  {n.type==="report"&&!n.read&&<div style={{fontSize:9,color:"#ff4757",fontFamily:"sans-serif",background:"rgba(255,71,87,.12)",padding:"2px 7px",borderRadius:6,flexShrink:0}}>NEW</div>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
       <div style={{display:"flex",overflowX:"auto",borderBottom:"1px solid rgba(200,150,50,.12)",background:"rgba(10,0,21,.8)",padding:"0 14px"}}>
         {TABS.map(([key,label])=>(
           <button key={key} onClick={()=>setTab(key)} style={{whiteSpace:"nowrap",padding:"12px 13px",border:"none",background:"transparent",color:tab===key?G:"#8a7a6a",fontFamily:"sans-serif",fontSize:12,cursor:"pointer",borderBottom:tab===key?"2px solid "+G:"2px solid transparent",fontWeight:tab===key?700:400}}>
-            {label}{key==="astrologers"&&pending.length>0?<span style={{marginLeft:5,background:"#ff4757",color:"white",fontSize:9,padding:"1px 5px",borderRadius:8}}>{pending.length}</span>:null}
+            {label}{key==="astrologers"&&pending.length>0?<span style={{marginLeft:5,background:"#ff4757",color:"white",fontSize:9,padding:"1px 5px",borderRadius:8}}>{pending.length}</span>:key==="reports"?<span style={{marginLeft:5,background:reports.filter(r=>r.status==="pending").length>0?"#ff4757":"transparent",color:"white",fontSize:9,padding:"1px 5px",borderRadius:8}}>{reports.filter(r=>r.status==="pending").length>0?reports.filter(r=>r.status==="pending").length:""}</span>:null}
           </button>
         ))}
       </div>
@@ -325,12 +436,114 @@ function AdminPanel(){
                 <div key={i} className="row" style={{display:"grid",gridTemplateColumns:"2fr 1fr 1fr 1fr 1fr",gap:8,padding:"9px 8px",borderBottom:"1px solid rgba(200,150,50,.06)",alignItems:"center"}}>
                   <div style={{fontSize:12,color:"#e8d5b7",fontFamily:"sans-serif",fontWeight:600}}>{t.user}</div>
                   <Badge label={t.type} color={t.type==="recharge"?"approved":"active"}/>
-                  <div style={{fontSize:12,color:G,fontFamily:"sans-serif",fontWeight:700}}>{t.amount?"₹"+t.amount:"—"}</div>
+                  <div style={{fontSize:12,color:G,fontFamily:"sans-serif",fontWeight:700}}>{t.amount?"₹"+t.amount:"-"}</div>
                   <div style={{fontSize:11,color:"#a29bfe",fontFamily:"sans-serif"}}>🪙{t.coins}</div>
                   <div style={{fontSize:10,color:"#636e72",fontFamily:"sans-serif"}}>{t.time}</div>
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        
+        {tab==="users"&&(
+          <div style={{animation:"floatIn .35s ease"}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+              <div style={{fontSize:15,fontWeight:700,color:G}}>&#128101; Users ({users.length})</div>
+              <div style={{fontSize:11,color:"#8a7a6a",fontFamily:"sans-serif"}}>
+                <span style={{color:"#00b894",marginRight:8}}>&#9679; {users.filter(u=>u.status==="active").length} active</span>
+                <span style={{color:"#ff4757"}}>&#9679; {users.filter(u=>u.status==="suspended").length} suspended</span>
+              </div>
+            </div>
+            {/* Search */}
+            <input value={userSearch} onChange={e=>setUserSearch(e.target.value)} placeholder="Search by name, email or country..." style={{width:"100%",background:"#0d0a1a",border:"1px solid rgba(200,150,50,.25)",borderRadius:11,padding:"10px 13px",color:"#e8d5b7",fontFamily:"sans-serif",fontSize:13,outline:"none",boxSizing:"border-box",marginBottom:12}}/>
+            {users.filter(u=>!userSearch||(u.name+u.email+u.country).toLowerCase().includes(userSearch.toLowerCase())).map(u=>(
+              <div key={u.id} style={{...cd,opacity:u.status==="suspended"?0.7:1,border:"1px solid "+(u.status==="suspended"?"rgba(255,71,87,.25)":"rgba(200,150,50,.18)")}}>
+                <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:10}}>
+                  <div style={{flex:1}}>
+                    <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:3}}>
+                      <div style={{width:32,height:32,borderRadius:"50%",background:"linear-gradient(135deg,#6c5ce7,#a29bfe)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:700,color:"#fff",fontFamily:"sans-serif",flexShrink:0}}>{u.name[0]}</div>
+                      <div>
+                        <div style={{fontSize:13,fontWeight:700,color:"#e8d5b7",fontFamily:"sans-serif"}}>{u.name}</div>
+                        <div style={{fontSize:10,color:"#8a7a6a",fontFamily:"sans-serif"}}>{u.email}</div>
+                      </div>
+                      {u.status==="suspended"&&<div style={{fontSize:9,background:"rgba(255,149,0,.15)",color:"#ffa502",padding:"2px 7px",borderRadius:6,fontFamily:"sans-serif",fontWeight:700}}>SUSPENDED</div>}{u.status==="blocked"&&<div style={{fontSize:9,background:"rgba(255,71,87,.15)",color:"#ff4757",padding:"2px 7px",borderRadius:6,fontFamily:"sans-serif",fontWeight:700}}>&#128683; BLOCKED</div>}
+                      {u.reports>0&&<div style={{fontSize:9,background:"rgba(255,149,0,.15)",color:"#ffa502",padding:"2px 7px",borderRadius:6,fontFamily:"sans-serif",fontWeight:700}}>{u.reports} REPORT{u.reports>1?"S":""}</div>}
+                    </div>
+                    <div style={{display:"flex",gap:10,flexWrap:"wrap",marginTop:4}}>
+                      {[["&#128222;",u.phone],["&#127758;",u.country],["&#128337;","Joined "+u.joined],["&#128172;",u.sessions+" sessions"],["&#129689;",u.coins+" coins"]].map(([icon,val])=>(
+                        <div key={val} style={{fontSize:10,color:"#8a7a6a",fontFamily:"sans-serif",display:"flex",alignItems:"center",gap:3}}>
+                          <span dangerouslySetInnerHTML={{__html:icon}}/>{val}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div style={{display:"flex",flexDirection:"column",gap:5,flexShrink:0}}>
+                    {u.status==="active"&&<button onClick={()=>suspendUser(u.id)} style={{background:"rgba(255,149,0,.12)",border:"1px solid rgba(255,149,0,.3)",borderRadius:7,padding:"4px 9px",color:"#ffa502",fontFamily:"sans-serif",fontSize:10,cursor:"pointer"}}>Suspend</button>}
+                    {u.status==="active"&&<button onClick={()=>blockUser(u.id)} style={{background:"rgba(255,71,87,.12)",border:"1px solid rgba(255,71,87,.3)",borderRadius:7,padding:"4px 9px",color:"#ff4757",fontFamily:"sans-serif",fontSize:10,cursor:"pointer"}}>&#128683; Block</button>}
+                    {(u.status==="suspended"||u.status==="blocked")&&<button onClick={()=>unblockUser(u.id)} style={{background:"rgba(0,184,148,.12)",border:"1px solid rgba(0,184,148,.3)",borderRadius:7,padding:"4px 9px",color:"#00b894",fontFamily:"sans-serif",fontSize:10,cursor:"pointer"}}>Unblock</button>}
+                    <button onClick={()=>openMsgModal(u)} style={{background:"rgba(162,155,254,.1)",border:"1px solid rgba(162,155,254,.25)",borderRadius:7,padding:"4px 9px",color:"#a29bfe",fontFamily:"sans-serif",fontSize:10,cursor:"pointer"}}>&#128140; Message</button>
+                    <button onClick={()=>{if(window.confirm("Delete "+u.name+"?"))deleteUser(u.id);}} style={{background:"rgba(99,110,114,.1)",border:"1px solid rgba(99,110,114,.2)",borderRadius:7,padding:"4px 9px",color:"#636e72",fontFamily:"sans-serif",fontSize:10,cursor:"pointer"}}>Delete</button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {tab==="reports"&&(
+          <div style={{animation:"floatIn .35s ease"}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+              <div style={{fontSize:15,fontWeight:700,color:G}}>&#128680; User Reports</div>
+              <div style={{fontSize:11,color:"#ff4757",fontFamily:"sans-serif",background:"rgba(255,71,87,.1)",padding:"3px 10px",borderRadius:8,border:"1px solid rgba(255,71,87,.2)"}}>
+                {reports.filter(r=>r.status==="pending").length} pending review
+              </div>
+            </div>
+            {reports.length===0&&(
+              <div style={{...cd,textAlign:"center",padding:28}}>
+                <div style={{fontSize:32,marginBottom:8}}>&#10003;</div>
+                <div style={{fontSize:13,color:"#00b894",fontFamily:"sans-serif"}}>No reports - all clear!</div>
+              </div>
+            )}
+            {reports.map(r=>(
+              <div key={r.id} style={{...cd,border:"1px solid "+(r.status==="pending"?"rgba(255,71,87,.3)":"rgba(200,150,50,.18)"),background:r.status==="pending"?"rgba(255,71,87,.04)":"rgba(255,255,255,.03)"}}>
+                <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:8}}>
+                  <div style={{flex:1}}>
+                    <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:6}}>
+                      <div style={{fontSize:9,fontWeight:700,padding:"2px 8px",borderRadius:6,fontFamily:"sans-serif",background:r.status==="pending"?"rgba(255,71,87,.15)":"rgba(100,100,100,.15)",color:r.status==="pending"?"#ff4757":"#636e72"}}>
+                        {r.status==="pending"?"PENDING REVIEW":"REVIEWED"}
+                      </div>
+                    </div>
+                    <div style={{fontSize:13,fontWeight:700,color:"#e8d5b7",fontFamily:"sans-serif",marginBottom:2}}>
+                      &#128101; {r.userName}
+                    </div>
+                    <div style={{fontSize:11,color:"#c8a060",fontFamily:"sans-serif",marginBottom:4}}>
+                      Reported by: {r.astrologer}
+                    </div>
+                    <div style={{fontSize:12,fontWeight:600,color:"#ffa502",fontFamily:"sans-serif",marginBottom:4}}>
+                      {r.reason}
+                    </div>
+                    <div style={{fontSize:11,color:"#8a7a6a",fontFamily:"sans-serif",lineHeight:1.6,marginBottom:6}}>
+                      {r.details}
+                    </div>
+                    <div style={{fontSize:10,color:"#636e72",fontFamily:"sans-serif"}}>{r.time}</div>
+                  </div>
+                </div>
+                {r.status==="pending"&&(
+                  <div style={{display:"flex",gap:8,marginTop:10}}>
+                    <button onClick={()=>{blockUser(r.userId);resolveReport(r.id);toast$("User blocked and report resolved","warn");}} style={{flex:1,background:"rgba(255,71,87,.12)",border:"1px solid rgba(255,71,87,.3)",borderRadius:8,padding:"7px",color:"#ff4757",fontFamily:"sans-serif",fontSize:11,cursor:"pointer"}}>
+                      &#128683; Block User
+                    </button>
+                    <button onClick={()=>resolveReport(r.id)} style={{flex:1,background:"rgba(0,184,148,.12)",border:"1px solid rgba(0,184,148,.3)",borderRadius:8,padding:"7px",color:"#00b894",fontFamily:"sans-serif",fontSize:11,cursor:"pointer"}}>
+                      &#10003; Mark Reviewed
+                    </button>
+                    <button onClick={()=>dismissReport(r.id)} style={{flex:1,background:"rgba(100,100,100,.1)",border:"1px solid rgba(100,100,100,.2)",borderRadius:8,padding:"7px",color:"#636e72",fontFamily:"sans-serif",fontSize:11,cursor:"pointer"}}>
+                      Dismiss
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         )}
 
@@ -375,11 +588,53 @@ function AdminPanel(){
                   </div>
                 ))}
               </div>
-              <div style={{fontSize:10,color:"#8a7a6a",fontFamily:"sans-serif",marginTop:6,textAlign:"center"}}>Peak: 6PM–10PM IST · Gold band highlighted</div>
+              <div style={{fontSize:10,color:"#8a7a6a",fontFamily:"sans-serif",marginTop:6,textAlign:"center"}}>Peak: 6PM-10PM IST · Gold band highlighted</div>
             </div>
           </div>
         )}
       </div>
+      {/* Send Message to User Modal */}
+      {showMsgModal&&msgUser&&(
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.88)",zIndex:400,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
+          <div style={{background:"linear-gradient(180deg,#0f0025,#080618)",border:"1px solid rgba(162,155,254,.25)",borderRadius:18,padding:"22px 18px",width:"100%",maxWidth:380}}>
+            {!msgSent?(
+              <div>
+                <div style={{textAlign:"center",marginBottom:16}}>
+                  <div style={{fontSize:24,marginBottom:6}}>&#128140;</div>
+                  <div style={{fontSize:15,fontWeight:700,color:"#a29bfe",marginBottom:3}}>Send Notification</div>
+                  <div style={{fontSize:11,color:"#8a7a6a",fontFamily:"sans-serif"}}>Sending to: <strong style={{color:"#e8d5b7"}}>{msgUser.name}</strong></div>
+                </div>
+                <div style={{marginBottom:10}}>
+                  <div style={{fontSize:11,color:"#c8a060",fontFamily:"sans-serif",letterSpacing:1,marginBottom:6}}>SELECT TEMPLATE</div>
+                  <div style={{display:"flex",flexDirection:"column",gap:6,marginBottom:10}}>
+                    {[
+                      "Your account has received a warning due to reported behaviour.",
+                      "Please review our community guidelines to continue using MiraXAstro.",
+                      "Your account has been temporarily suspended pending review.",
+                      "Custom message..."
+                    ].map(t=>(
+                      <div key={t} onClick={()=>setMsgText(t==="Custom message..."?"":t)} style={{padding:"8px 12px",borderRadius:9,border:"1px solid",borderColor:msgText===t?"rgba(162,155,254,.5)":"rgba(200,150,50,.15)",background:msgText===t?"rgba(162,155,254,.08)":"transparent",fontSize:11,fontFamily:"sans-serif",color:msgText===t?"#a29bfe":"#8a7a6a",cursor:"pointer"}}>{t}</div>
+                    ))}
+                  </div>
+                  <textarea value={msgText} onChange={e=>setMsgText(e.target.value)} placeholder="Type your message to the user..." rows={3} style={{width:"100%",background:"#0d0a1a",border:"1px solid rgba(200,150,50,.25)",borderRadius:10,padding:"10px 12px",color:"#e8d5b7",fontFamily:"sans-serif",fontSize:12,outline:"none",resize:"none",boxSizing:"border-box"}}/>
+                </div>
+                <div style={{display:"flex",gap:8}}>
+                  <button onClick={()=>setShowMsgModal(false)} style={{flex:1,background:"transparent",border:"1px solid rgba(200,150,50,.2)",borderRadius:9,padding:"9px",color:"#8a7a6a",fontFamily:"sans-serif",fontSize:12,cursor:"pointer"}}>Cancel</button>
+                  <button disabled={!msgText.trim()} onClick={()=>{if(msgText.trim())setMsgSent(true);}} style={{flex:2,background:msgText.trim()?"linear-gradient(135deg,#5f3dc4,#a29bfe)":"rgba(100,100,100,.2)",color:msgText.trim()?"white":"#636e72",border:"none",borderRadius:9,padding:"9px",fontWeight:700,fontFamily:"sans-serif",fontSize:12,cursor:msgText.trim()?"pointer":"not-allowed"}}>Send Notification</button>
+                </div>
+              </div>
+            ):(
+              <div style={{textAlign:"center",padding:"16px 0"}}>
+                <div style={{fontSize:36,marginBottom:10}}>&#10003;</div>
+                <div style={{fontSize:15,fontWeight:700,color:"#00b894",marginBottom:6}}>Notification Sent!</div>
+                <div style={{fontSize:11,color:"#8a7a6a",fontFamily:"sans-serif",lineHeight:1.7,marginBottom:14}}>{msgUser.name} has been notified via email and in-app notification.</div>
+                <button onClick={()=>setShowMsgModal(false)} style={{...bG,padding:"9px 24px"}}>Close</button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {toast&&<div style={{position:"fixed",bottom:22,left:"50%",transform:"translateX(-50%)",background:toast.t==="warn"?"rgba(253,203,110,.93)":"rgba(0,184,148,.93)",color:toast.t==="warn"?"#0a0015":"white",padding:"10px 20px",borderRadius:12,fontFamily:"sans-serif",fontSize:13,fontWeight:600,zIndex:600,whiteSpace:"nowrap",animation:"floatIn .3s ease"}}>{toast.m}</div>}
     </div>
   );
@@ -400,11 +655,11 @@ function AstrologerEarnings(){
     setWProc(true);
     await new Promise(r=>setTimeout(r,1800));
     setWProc(false);setShowW(false);setWAmt("");
-    toast$("Withdrawal request submitted — processed in 3-5 working days");
+    toast$("Withdrawal request submitted - processed in 3-5 working days");
   }
 
   return(
-    <div style={{minHeight:"100vh",background:BG,fontFamily:"'Playfair Display',Georgia,serif",color:"#e8d5b7",position:"relative"}}>
+    <div style={{minHeight:"100vh",background:BG,fontFamily:"Georgia,serif",color:"#e8d5b7",position:"relative"}}>
       <Stars/>
       <div style={{position:"sticky",top:0,zIndex:100,background:"rgba(10,0,21,.95)",backdropFilter:"blur(20px)",borderBottom:"1px solid rgba(200,150,50,.2)",padding:"0 16px",display:"flex",alignItems:"center",justifyContent:"space-between",height:60}}>
         <div><div style={{fontSize:16,fontWeight:700,background:"linear-gradient(90deg,#e8d5b7,#ffd700,#a29bfe)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>💰 My Earnings</div><div style={{fontSize:10,color:"#636e72",fontFamily:"sans-serif"}}>Pandit Rajesh Sharma</div></div>
@@ -515,21 +770,331 @@ function AstrologerEarnings(){
           </div>
         </div>
       )}
+      {/* Send Message to User Modal */}
+      {showMsgModal&&msgUser&&(
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.88)",zIndex:400,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
+          <div style={{background:"linear-gradient(180deg,#0f0025,#080618)",border:"1px solid rgba(162,155,254,.25)",borderRadius:18,padding:"22px 18px",width:"100%",maxWidth:380}}>
+            {!msgSent?(
+              <div>
+                <div style={{textAlign:"center",marginBottom:16}}>
+                  <div style={{fontSize:24,marginBottom:6}}>&#128140;</div>
+                  <div style={{fontSize:15,fontWeight:700,color:"#a29bfe",marginBottom:3}}>Send Notification</div>
+                  <div style={{fontSize:11,color:"#8a7a6a",fontFamily:"sans-serif"}}>Sending to: <strong style={{color:"#e8d5b7"}}>{msgUser.name}</strong></div>
+                </div>
+                <div style={{marginBottom:10}}>
+                  <div style={{fontSize:11,color:"#c8a060",fontFamily:"sans-serif",letterSpacing:1,marginBottom:6}}>SELECT TEMPLATE</div>
+                  <div style={{display:"flex",flexDirection:"column",gap:6,marginBottom:10}}>
+                    {[
+                      "Your account has received a warning due to reported behaviour.",
+                      "Please review our community guidelines to continue using MiraXAstro.",
+                      "Your account has been temporarily suspended pending review.",
+                      "Custom message..."
+                    ].map(t=>(
+                      <div key={t} onClick={()=>setMsgText(t==="Custom message..."?"":t)} style={{padding:"8px 12px",borderRadius:9,border:"1px solid",borderColor:msgText===t?"rgba(162,155,254,.5)":"rgba(200,150,50,.15)",background:msgText===t?"rgba(162,155,254,.08)":"transparent",fontSize:11,fontFamily:"sans-serif",color:msgText===t?"#a29bfe":"#8a7a6a",cursor:"pointer"}}>{t}</div>
+                    ))}
+                  </div>
+                  <textarea value={msgText} onChange={e=>setMsgText(e.target.value)} placeholder="Type your message to the user..." rows={3} style={{width:"100%",background:"#0d0a1a",border:"1px solid rgba(200,150,50,.25)",borderRadius:10,padding:"10px 12px",color:"#e8d5b7",fontFamily:"sans-serif",fontSize:12,outline:"none",resize:"none",boxSizing:"border-box"}}/>
+                </div>
+                <div style={{display:"flex",gap:8}}>
+                  <button onClick={()=>setShowMsgModal(false)} style={{flex:1,background:"transparent",border:"1px solid rgba(200,150,50,.2)",borderRadius:9,padding:"9px",color:"#8a7a6a",fontFamily:"sans-serif",fontSize:12,cursor:"pointer"}}>Cancel</button>
+                  <button disabled={!msgText.trim()} onClick={()=>{if(msgText.trim())setMsgSent(true);}} style={{flex:2,background:msgText.trim()?"linear-gradient(135deg,#5f3dc4,#a29bfe)":"rgba(100,100,100,.2)",color:msgText.trim()?"white":"#636e72",border:"none",borderRadius:9,padding:"9px",fontWeight:700,fontFamily:"sans-serif",fontSize:12,cursor:msgText.trim()?"pointer":"not-allowed"}}>Send Notification</button>
+                </div>
+              </div>
+            ):(
+              <div style={{textAlign:"center",padding:"16px 0"}}>
+                <div style={{fontSize:36,marginBottom:10}}>&#10003;</div>
+                <div style={{fontSize:15,fontWeight:700,color:"#00b894",marginBottom:6}}>Notification Sent!</div>
+                <div style={{fontSize:11,color:"#8a7a6a",fontFamily:"sans-serif",lineHeight:1.7,marginBottom:14}}>{msgUser.name} has been notified via email and in-app notification.</div>
+                <button onClick={()=>setShowMsgModal(false)} style={{...bG,padding:"9px 24px"}}>Close</button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {toast&&<div style={{position:"fixed",bottom:22,left:"50%",transform:"translateX(-50%)",background:"rgba(0,184,148,.93)",color:"white",padding:"10px 20px",borderRadius:12,fontFamily:"sans-serif",fontSize:13,fontWeight:600,zIndex:600,whiteSpace:"nowrap",animation:"floatIn .3s ease"}}>{toast.m}</div>}
     </div>
   );
 }
 
 export default function App(){
+  const [auth,setAuth]=useState(false);
+  const [pw,setPw]=useState("");
+  const [err,setErr]=useState(false);
   const [view,setView]=useState("admin");
+  const [showPwChange,setShowPwChange]=useState(false);
+  const [oldPw,setOldPw]=useState("");
+  const [newPw,setNewPw]=useState("");
+  const [confirmPw,setConfirmPw]=useState("");
+  const [pwMsg,setPwMsg]=useState({t:"",c:""});
+  const [showForgot,setShowForgot]=useState(false);
+  const [forgotStep,setForgotStep]=useState(1);
+  const [otpSent,setOtpSent]=useState("");
+  const [otpEntered,setOtpEntered]=useState("");
+  const [otpCountdown,setOtpCountdown]=useState(0);
+  const [resetNew,setResetNew]=useState("");
+  const [resetConfirm,setResetConfirm]=useState("");
+  const [resetMsg,setResetMsg]=useState({t:"",c:""});
+  const otpTimer=React.useRef();
+  const ADMIN_EMAIL="support@miraxastro.com";
+
+  const ADMIN_PW=localStorage.getItem("mxa_admin_pw")||"MiraX@Admin2025";
+
+  function login(){
+    const current=localStorage.getItem("mxa_admin_pw")||"MiraX@Admin2025";
+    if(pw===current){setAuth(true);setErr(false);}
+    else{setErr(true);}
+  }
+
+  function changePw(){
+    const current=localStorage.getItem("mxa_admin_pw")||"MiraX@Admin2025";
+    if(oldPw!==current){setPwMsg({t:"Current password incorrect",c:"#ff4757"});return;}
+    if(newPw.length<8){setPwMsg({t:"Min 8 characters required",c:"#ff4757"});return;}
+    if(newPw!==confirmPw){setPwMsg({t:"Passwords do not match",c:"#ff4757"});return;}
+    localStorage.setItem("mxa_admin_pw",newPw);
+    setPwMsg({t:"Password updated successfully!",c:"#00b894"});
+    setOldPw("");setNewPw("");setConfirmPw("");
+    setTimeout(()=>{setShowPwChange(false);setPwMsg({t:"",c:""});},2000);
+  }
+
+  function sendOtp(){
+    const otp=String(Math.floor(100000+Math.random()*900000));
+    setOtpSent(otp);
+    setOtpEntered("");
+    setResetMsg({t:"",c:""});
+    setForgotStep(2);
+    setOtpCountdown(60);
+    clearInterval(otpTimer.current);
+    otpTimer.current=setInterval(()=>setOtpCountdown(c=>{if(c<=1){clearInterval(otpTimer.current);return 0;}return c-1;}),1000);
+    console.log("Admin Reset OTP (demo):",otp);
+  }
+  function verifyResetOtp(){
+    if(otpEntered.trim()===otpSent){
+      setForgotStep(3);
+      setResetMsg({t:"",c:""});
+    } else {
+      setResetMsg({t:"Incorrect code. Please try again.",c:"#ff4757"});
+    }
+  }
+  function resetPw(){
+    if(resetNew.length<8){setResetMsg({t:"Min 8 characters required",c:"#ff4757"});return;}
+    if(resetNew!==resetConfirm){setResetMsg({t:"Passwords do not match",c:"#ff4757"});return;}
+    localStorage.setItem("mxa_admin_pw",resetNew);
+    setResetMsg({t:"Password reset successfully!",c:"#00b894"});
+    setResetNew("");setResetConfirm("");
+    setTimeout(()=>{
+      setShowForgot(false);
+      setForgotStep(1);
+      setOtpSent("");setOtpEntered("");
+      setResetMsg({t:"",c:""});
+      setPw("");setErr(false);
+    },2000);
+  }
+  function closeForgot(){
+    setShowForgot(false);
+    setForgotStep(1);
+    setOtpSent("");setOtpEntered("");
+    setResetNew("");setResetConfirm("");
+    setResetMsg({t:"",c:""});
+    clearInterval(otpTimer.current);
+  }
+
+  const ip2={width:"100%",background:"#0d0a1a",border:"1px solid rgba(200,150,50,.28)",borderRadius:11,padding:"11px 13px",color:"#e8d5b7",fontFamily:"sans-serif",fontSize:13,outline:"none",boxSizing:"border-box",marginBottom:10};
+
+  // -- Login Screen ------------------------------------------
+  if(!auth) return(
+    <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#0a0015,#0d0028,#010a1a)",display:"flex",alignItems:"center",justifyContent:"center",padding:20,fontFamily:"Georgia,serif"}}>
+      <div style={{width:"100%",maxWidth:360}}>
+        {/* Logo */}
+        <div style={{textAlign:"center",marginBottom:28}}>
+          <div style={{width:70,height:70,borderRadius:"50%",border:"1px solid rgba(232,213,183,.35)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 12px",background:"rgba(162,155,254,.05)"}}>
+            <span style={{fontSize:28,fontWeight:700,fontFamily:"Georgia,serif",background:"linear-gradient(135deg,#f0dfc0,#7b6fc4)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>MX</span>
+          </div>
+          <div style={{fontSize:20,fontWeight:300,letterSpacing:4,color:"#e8d5b7"}}>
+            Mira<span style={{background:"linear-gradient(135deg,#7b6fc4,#b8aae8)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",fontWeight:400}}>X</span>Astro
+          </div>
+          <div style={{fontSize:11,color:"#a29bfe",fontFamily:"sans-serif",letterSpacing:2,marginTop:6}}>ADMIN PANEL</div>
+          <div style={{fontSize:10,color:"#636e72",fontFamily:"sans-serif",marginTop:4}}>Restricted Access - Authorised Personnel Only</div>
+        </div>
+
+        {/* Login card */}
+        <div style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(200,150,50,.2)",borderRadius:18,padding:"24px 20px"}}>
+          <div style={{fontSize:13,color:"#c8a060",fontFamily:"sans-serif",letterSpacing:1,marginBottom:6}}>ADMIN PASSWORD</div>
+          <input
+            type="password"
+            value={pw}
+            onChange={e=>{setPw(e.target.value);setErr(false);}}
+            onKeyDown={e=>e.key==="Enter"&&login()}
+            placeholder="Enter admin password"
+            autoFocus
+            style={{...ip2,fontSize:15,marginBottom:err?6:12}}
+          />
+          {err&&<div style={{fontSize:12,color:"#ff4757",fontFamily:"sans-serif",marginBottom:10}}>&#9888; Incorrect password. Please try again.</div>}
+          <button
+            onClick={login}
+            style={{width:"100%",background:"linear-gradient(135deg,#c8a000,#ffd700)",color:"#0a0015",border:"none",borderRadius:11,padding:"13px",fontWeight:700,fontFamily:"sans-serif",fontSize:14,cursor:"pointer"}}
+          >
+            Access Admin Panel
+          </button>
+          <div style={{textAlign:"center",marginTop:12}}>
+            <button onClick={()=>{setShowForgot(true);setResetMsg({t:"",c:""});}} style={{background:"none",border:"none",color:"#8a7a6a",fontFamily:"sans-serif",fontSize:12,cursor:"pointer",textDecoration:"underline"}}>
+              Forgot password?
+            </button>
+          </div>
+        </div>
+
+        {/* Forgot Password Modal */}
+        {showForgot&&(
+          <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.92)",zIndex:100,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
+            <div style={{background:"linear-gradient(180deg,#0f0025,#0a0018)",border:"1px solid rgba(255,215,0,.2)",borderRadius:18,padding:"26px 20px",width:"100%",maxWidth:340}}>
+
+              {/* Step 1 - Send OTP */}
+              {forgotStep===1&&(
+                <div>
+                  <div style={{textAlign:"center",marginBottom:18}}>
+                    <div style={{fontSize:30,marginBottom:8}}>&#128272;</div>
+                    <div style={{fontSize:16,fontWeight:700,color:"#ffd700",marginBottom:4}}>Reset Admin Password</div>
+                    <div style={{fontSize:11,color:"#8a7a6a",fontFamily:"sans-serif",lineHeight:1.6}}>We will send a one-time code to your registered admin email address.</div>
+                  </div>
+                  <div style={{background:"rgba(162,155,254,.06)",border:"1px solid rgba(162,155,254,.2)",borderRadius:10,padding:"12px 14px",marginBottom:16,display:"flex",alignItems:"center",gap:10}}>
+                    <span style={{fontSize:20}}>&#9993;</span>
+                    <div>
+                      <div style={{fontSize:10,color:"#8a7a6a",fontFamily:"sans-serif",letterSpacing:1,marginBottom:2}}>SENDING CODE TO</div>
+                      <div style={{fontSize:13,fontWeight:700,color:"#e8d5b7",fontFamily:"sans-serif"}}>{ADMIN_EMAIL}</div>
+                    </div>
+                  </div>
+                  {resetMsg.t&&<div style={{fontSize:12,color:resetMsg.c,fontFamily:"sans-serif",marginBottom:10,padding:"7px 10px",background:"rgba(255,255,255,.04)",borderRadius:8}}>{resetMsg.t}</div>}
+                  <button onClick={sendOtp} style={{width:"100%",background:"linear-gradient(135deg,#c8a000,#ffd700)",color:"#0a0015",border:"none",borderRadius:10,padding:"12px",fontWeight:700,fontFamily:"sans-serif",fontSize:13,cursor:"pointer",marginBottom:8}}>
+                    Send Verification Code
+                  </button>
+                  <button onClick={closeForgot} style={{width:"100%",background:"transparent",border:"1px solid rgba(200,150,50,.2)",borderRadius:10,padding:"10px",color:"#8a7a6a",fontFamily:"sans-serif",fontSize:12,cursor:"pointer"}}>
+                    Cancel
+                  </button>
+                </div>
+              )}
+
+              {/* Step 2 - Enter OTP */}
+              {forgotStep===2&&(
+                <div>
+                  <div style={{textAlign:"center",marginBottom:18}}>
+                    <div style={{fontSize:30,marginBottom:8}}>&#128235;</div>
+                    <div style={{fontSize:16,fontWeight:700,color:"#ffd700",marginBottom:4}}>Check Your Email</div>
+                    <div style={{fontSize:11,color:"#8a7a6a",fontFamily:"sans-serif",lineHeight:1.6}}>
+                      A 6-digit code was sent to<br/>
+                      <strong style={{color:"#e8d5b7"}}>{ADMIN_EMAIL}</strong>
+                    </div>
+                    <div style={{fontSize:10,color:"#a29bfe",fontFamily:"sans-serif",marginTop:8,background:"rgba(162,155,254,.08)",padding:"4px 10px",borderRadius:6,display:"inline-block"}}>
+                      Demo mode - check browser console for OTP
+                    </div>
+                  </div>
+                  <div style={{marginBottom:14}}>
+                    <div style={{fontSize:11,color:"#c8a060",fontFamily:"sans-serif",letterSpacing:1,marginBottom:6}}>ENTER 6-DIGIT CODE</div>
+                    <input
+                      value={otpEntered}
+                      onChange={e=>setOtpEntered(e.target.value.replace(/\D/g,"").slice(0,6))}
+                      onKeyDown={e=>e.key==="Enter"&&verifyResetOtp()}
+                      placeholder="_ _ _ _ _ _"
+                      maxLength={6}
+                      style={{...ip2,fontSize:22,fontWeight:700,textAlign:"center",letterSpacing:8,color:"#ffd700",marginBottom:8}}
+                    />
+                    {resetMsg.t&&<div style={{fontSize:12,color:resetMsg.c,fontFamily:"sans-serif",marginBottom:8,padding:"7px 10px",background:"rgba(255,255,255,.04)",borderRadius:8}}>&#9888; {resetMsg.t}</div>}
+                  </div>
+                  <button onClick={verifyResetOtp} disabled={otpEntered.length!==6} style={{width:"100%",background:otpEntered.length===6?"linear-gradient(135deg,#c8a000,#ffd700)":"rgba(100,100,100,.2)",color:otpEntered.length===6?"#0a0015":"#636e72",border:"none",borderRadius:10,padding:"12px",fontWeight:700,fontFamily:"sans-serif",fontSize:13,cursor:otpEntered.length===6?"pointer":"not-allowed",marginBottom:10}}>
+                    Verify Code
+                  </button>
+                  <div style={{textAlign:"center",marginBottom:8}}>
+                    {otpCountdown>0
+                      ?<div style={{fontSize:11,color:"#8a7a6a",fontFamily:"sans-serif"}}>Resend code in {otpCountdown}s</div>
+                      :<button onClick={sendOtp} style={{background:"none",border:"none",color:"#ffd700",fontFamily:"sans-serif",fontSize:12,cursor:"pointer",textDecoration:"underline"}}>Resend Code</button>
+                    }
+                  </div>
+                  <button onClick={closeForgot} style={{width:"100%",background:"transparent",border:"1px solid rgba(200,150,50,.2)",borderRadius:10,padding:"10px",color:"#8a7a6a",fontFamily:"sans-serif",fontSize:12,cursor:"pointer"}}>
+                    Cancel
+                  </button>
+                </div>
+              )}
+
+              {/* Step 3 - Set New Password */}
+              {forgotStep===3&&(
+                <div>
+                  <div style={{textAlign:"center",marginBottom:18}}>
+                    <div style={{fontSize:30,marginBottom:8}}>&#128274;</div>
+                    <div style={{fontSize:16,fontWeight:700,color:"#00b894",marginBottom:4}}>Identity Verified ✓</div>
+                    <div style={{fontSize:11,color:"#8a7a6a",fontFamily:"sans-serif"}}>Now set your new admin password</div>
+                  </div>
+                  <div style={{marginBottom:10}}>
+                    <div style={{fontSize:11,color:"#c8a060",fontFamily:"sans-serif",letterSpacing:1,marginBottom:5}}>NEW PASSWORD</div>
+                    <input type="password" value={resetNew} onChange={e=>setResetNew(e.target.value)} placeholder="Min 8 characters" style={{...ip2}}/>
+                    <div style={{fontSize:11,color:"#c8a060",fontFamily:"sans-serif",letterSpacing:1,marginBottom:5}}>CONFIRM NEW PASSWORD</div>
+                    <input type="password" value={resetConfirm} onChange={e=>setResetConfirm(e.target.value)} onKeyDown={e=>e.key==="Enter"&&resetPw()} placeholder="Repeat new password" style={{...ip2,marginBottom:8}}/>
+                    {resetMsg.t&&<div style={{fontSize:12,color:resetMsg.c,fontFamily:"sans-serif",marginBottom:8,padding:"7px 10px",background:"rgba(255,255,255,.04)",borderRadius:8}}>{resetMsg.t}</div>}
+                  </div>
+                  <button onClick={resetPw} style={{width:"100%",background:"linear-gradient(135deg,#c8a000,#ffd700)",color:"#0a0015",border:"none",borderRadius:10,padding:"12px",fontWeight:700,fontFamily:"sans-serif",fontSize:13,cursor:"pointer",marginBottom:8}}>
+                    Reset Password
+                  </button>
+                  <button onClick={closeForgot} style={{width:"100%",background:"transparent",border:"1px solid rgba(200,150,50,.2)",borderRadius:10,padding:"10px",color:"#8a7a6a",fontFamily:"sans-serif",fontSize:12,cursor:"pointer"}}>
+                    Cancel
+                  </button>
+                </div>
+              )}
+
+            </div>
+          </div>
+        )}
+
+                {/* Security note */}
+        <div style={{textAlign:"center",marginTop:16,fontSize:10,color:"rgba(255,255,255,.15)",fontFamily:"sans-serif"}}>
+          &#128274; Secured · MiraXAstro Admin Portal
+        </div>
+      </div>
+    </div>
+  );
+
+  // -- Admin Dashboard ---------------------------------------
   return(
     <div>
-      <div style={{position:"fixed",bottom:16,right:16,zIndex:999,display:"flex",gap:8}}>
-        <button onClick={()=>setView("admin")} style={{...bG,fontSize:11,padding:"7px 13px",opacity:view==="admin"?1:.5}}>🔑 Admin Panel</button>
-        <button onClick={()=>setView("astro")} style={{...bG,fontSize:11,padding:"7px 13px",opacity:view==="astro"?1:.5,background:"linear-gradient(135deg,#6c5ce7,#a29bfe)",color:"white"}}>💰 Earnings</button>
+      {/* Top bar */}
+      <div style={{position:"fixed",top:0,left:0,right:0,height:48,background:"rgba(10,0,21,.97)",borderBottom:"1px solid rgba(200,150,50,.2)",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 16px",zIndex:500}}>
+        <div style={{fontSize:14,fontWeight:700,color:"#ffd700",fontFamily:"Georgia,serif"}}>
+          Mira<span style={{background:"linear-gradient(135deg,#7b6fc4,#b8aae8)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>X</span>Astro
+          <span style={{fontSize:10,color:"#8a7a6a",fontFamily:"sans-serif",marginLeft:8,fontWeight:400}}>Admin</span>
+        </div>
+        <div style={{display:"flex",gap:8,alignItems:"center"}}>
+          <button onClick={()=>setView("admin")} style={{padding:"5px 12px",borderRadius:8,border:"1px solid",borderColor:view==="admin"?"rgba(255,215,0,.5)":"rgba(255,255,255,.1)",background:view==="admin"?"rgba(255,215,0,.1)":"transparent",color:view==="admin"?"#ffd700":"#8a7a6a",fontFamily:"sans-serif",fontSize:11,cursor:"pointer"}}>
+            Dashboard
+          </button>
+          <button onClick={()=>setView("astro")} style={{padding:"5px 12px",borderRadius:8,border:"1px solid",borderColor:view==="astro"?"rgba(162,155,254,.5)":"rgba(255,255,255,.1)",background:view==="astro"?"rgba(162,155,254,.1)":"transparent",color:view==="astro"?"#a29bfe":"#8a7a6a",fontFamily:"sans-serif",fontSize:11,cursor:"pointer"}}>
+            Earnings
+          </button>
+          <button onClick={()=>setShowPwChange(v=>!v)} style={{padding:"5px 10px",borderRadius:8,border:"1px solid rgba(255,255,255,.1)",background:"transparent",color:"#8a7a6a",fontFamily:"sans-serif",fontSize:11,cursor:"pointer"}}>
+            &#128274;
+          </button>
+          <button onClick={()=>{setAuth(false);setPw("");}} style={{padding:"5px 12px",borderRadius:8,border:"1px solid rgba(255,71,87,.3)",background:"rgba(255,71,87,.08)",color:"#ff8a80",fontFamily:"sans-serif",fontSize:11,cursor:"pointer"}}>
+            Logout
+          </button>
+        </div>
       </div>
-      {view==="admin"&&<AdminPanel/>}
-      {view==="astro"&&<AstrologerEarnings/>}
+
+      {/* Change password slide-down */}
+      {showPwChange&&(
+        <div style={{position:"fixed",top:48,right:0,width:300,background:"#0d0a1a",border:"1px solid rgba(200,150,50,.25)",borderRadius:"0 0 0 12px",padding:"16px",zIndex:499,boxShadow:"0 8px 24px rgba(0,0,0,.6)"}}>
+          <div style={{fontSize:12,fontWeight:700,color:"#ffd700",fontFamily:"sans-serif",marginBottom:12}}>Change Admin Password</div>
+          <input type="password" value={oldPw} onChange={e=>setOldPw(e.target.value)} placeholder="Current password" style={{...ip2,fontSize:12}}/>
+          <input type="password" value={newPw} onChange={e=>setNewPw(e.target.value)} placeholder="New password (min 8 chars)" style={{...ip2,fontSize:12}}/>
+          <input type="password" value={confirmPw} onChange={e=>setConfirmPw(e.target.value)} onKeyDown={e=>e.key==="Enter"&&changePw()} placeholder="Confirm new password" style={{...ip2,fontSize:12,marginBottom:8}}/>
+          {pwMsg.t&&<div style={{fontSize:11,color:pwMsg.c,fontFamily:"sans-serif",marginBottom:8}}>{pwMsg.t}</div>}
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={()=>{setShowPwChange(false);setPwMsg({t:"",c:""}); }} style={{flex:1,background:"transparent",border:"1px solid rgba(200,150,50,.2)",borderRadius:8,padding:"7px",color:"#8a7a6a",fontFamily:"sans-serif",fontSize:11,cursor:"pointer"}}>Cancel</button>
+            <button onClick={changePw} style={{flex:2,background:"linear-gradient(135deg,#c8a000,#ffd700)",color:"#0a0015",border:"none",borderRadius:8,padding:"7px",fontWeight:700,fontFamily:"sans-serif",fontSize:11,cursor:"pointer"}}>Update</button>
+          </div>
+        </div>
+      )}
+
+      {/* Main content - push down for top bar */}
+      <div style={{paddingTop:48}}>
+        {view==="admin"&&<AdminPanel/>}
+        {view==="astro"&&<AstrologerEarnings/>}
+      </div>
     </div>
   );
 }

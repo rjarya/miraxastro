@@ -375,15 +375,13 @@ function ProgressBar({step,steps}){
   );
 }
 
-// ── LANDING ───────────────────────────────────────────────────────
+// -- LANDING -------------------------------------------------------
 function Landing({onApply,onLogin}){
   return(
-    <div style={{minHeight:"100vh",background:BG,fontFamily:"'Playfair Display',Georgia,serif",color:"#e8d5b7",position:"relative"}}>
+    <div style={{minHeight:"100vh",background:BG,fontFamily:"Georgia,serif",color:"#e8d5b7",position:"relative"}}>
       <style>{CSS}</style><Stars/>
       <div style={{position:"relative",zIndex:1,maxWidth:440,margin:"0 auto",padding:"24px 16px 40px",animation:"floatIn .4s ease"}}>
-        <div style={{display:"inline-block",background:"rgba(255,71,87,.08)",border:"1px solid rgba(255,71,87,.2)",borderRadius:8,padding:"3px 12px",fontSize:11,color:"#ff8a80",fontFamily:"sans-serif",marginBottom:16}}>
-          🔒 Astrologer &amp; Partner Portal — Not visible to customers
-        </div>
+
         <div style={{textAlign:"center",marginBottom:20}}>
           <div style={{fontSize:36,marginBottom:8,animation:"pulse 3s ease infinite"}}>🔮</div>
           <MXLogo size={135}/>
@@ -399,7 +397,7 @@ function Landing({onApply,onLogin}){
         </div>
         <div style={cd}>
           <div style={{fontSize:13,fontWeight:700,color:G,marginBottom:12}}>Why Join MiraXAstro?</div>
-          {[["💰","Earn ₹10–₹500/min — you set your own rate"],["🌍","Customers from India and 20+ countries worldwide"],["⏰","Work from home on your own flexible schedule"],["🛡️","Secure payments with weekly payouts guaranteed"],["⭐","Build reputation with verified customer reviews"],["📱","Simple app — no technical knowledge required"]].map(([icon,text])=>(
+          {[["💰","Earn ₹10-₹500/min - you set your own rate"],["🌍","Customers from India and 20+ countries worldwide"],["⏰","Work from home on your own flexible schedule"],["🛡️","Secure payments with weekly payouts guaranteed"],["⭐","Build reputation with verified customer reviews"],["📱","Simple app - no technical knowledge required"]].map(([icon,text])=>(
             <div key={text} style={{display:"flex",gap:10,marginBottom:8}}>
               <span style={{fontSize:15,flexShrink:0}}>{icon}</span>
               <div style={{fontSize:13,color:"#c8b090",fontFamily:"sans-serif",lineHeight:1.5}}>{text}</div>
@@ -422,7 +420,7 @@ function Landing({onApply,onLogin}){
   );
 }
 
-// ── ONBOARDING FORM ───────────────────────────────────────────────
+// -- ONBOARDING FORM -----------------------------------------------
 function Onboard({onDone}){
   const [step,setStep]=useState(0);
   const [loading,setLoading]=useState(false);
@@ -463,7 +461,7 @@ function Onboard({onDone}){
     const rest=ALL_LANGS.filter(l=>!priority.includes(l));
     return [...priority,...rest];
   }
-  const SLOTS=["6AM–9AM","9AM–12PM","12PM–3PM","3PM–6PM","6PM–9PM","9PM–12AM","24/7"];
+  const SLOTS=["6AM-9AM","9AM-12PM","12PM-3PM","3PM-6PM","6PM-9PM","9PM-12AM","24/7"];
   const DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
   const [d,setD]=useState({name:"",email:"",phone:"",gender:"male",pw:"",pw2:"",agreed:false,photo:null,addr1:"",addr2:"",city:"",state:"",postcode:"",country:"",specs:[],langs:[],exp:"",qual:"",bio:"",rateChat:"",rateCall:"",slots:[],days:[],freeFirst:true,bankCountry:"",accountName:"",accountNum:"",bankName:"",branchName:"",ifsc:"",bsb:"",sortCode:"",routingNum:"",iban:"",swiftBic:"",panNum:"",taxId:""});
   const [errs,setErrs]=useState({});
@@ -541,13 +539,13 @@ function Onboard({onDone}){
   const iE=k=>({...ip,border:"1px solid "+(errs[k]?"rgba(255,71,87,.4)":"rgba(200,150,50,.28)")});
 
   return(
-    <div style={{minHeight:"100vh",background:BG,fontFamily:"'Playfair Display',Georgia,serif",color:"#e8d5b7",position:"relative"}}>
+    <div style={{minHeight:"100vh",background:BG,fontFamily:"Georgia,serif",color:"#e8d5b7",position:"relative"}}>
       <style>{CSS}</style><Stars/>
       <div style={{position:"sticky",top:0,zIndex:100,background:"rgba(10,0,21,.95)",backdropFilter:"blur(20px)",borderBottom:"1px solid rgba(200,150,50,.18)",padding:"0 16px",display:"flex",alignItems:"center",height:56}}>
         <button onClick={()=>step===0?onDone(null):back()} style={{background:"none",border:"none",color:"#8a7a6a",fontSize:17,cursor:"pointer",marginRight:11,padding:0}}>←</button>
         <div style={{flex:1}}>
           <div style={{fontSize:13,fontWeight:700,background:"linear-gradient(90deg,#e8d5b7,#ffd700,#a29bfe)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>✦ Astrologer Onboarding</div>
-          <div style={{fontSize:10,color:"#636e72",fontFamily:"sans-serif"}}>Step {step+1}/{STEPS.length} — {STEPS[step]}</div>
+          <div style={{fontSize:10,color:"#636e72",fontFamily:"sans-serif"}}>Step {step+1}/{STEPS.length} - {STEPS[step]}</div>
         </div>
         <div style={{fontSize:10,color:"#636e72",fontFamily:"sans-serif",background:"rgba(255,71,87,.08)",padding:"3px 9px",borderRadius:7,border:"1px solid rgba(255,71,87,.15)"}}>🔒 Partner Only</div>
       </div>
@@ -618,16 +616,16 @@ function Onboard({onDone}){
                 ?<img src={d.photo} alt="You" style={{width:90,height:90,borderRadius:"50%",objectFit:"cover",border:"3px solid rgba(255,215,0,.4)",margin:"0 auto 8px",display:"block"}}/>
                 :<div style={{marginBottom:7}}>
                    <img src={avUrl(d.name||"preview",d.gender)} style={{width:76,height:76,borderRadius:"50%",border:"3px dashed rgba(255,215,0,.2)",margin:"0 auto 6px",display:"block",opacity:.55}} alt=""/>
-                   <div style={{fontSize:11,color:"#5a4a3a",fontFamily:"sans-serif"}}>Auto-preview — upload your real photo below</div>
+                   <div style={{fontSize:11,color:"#5a4a3a",fontFamily:"sans-serif"}}>Auto-preview - upload your real photo below</div>
                  </div>
               }
-              <div style={{fontSize:13,color:d.photo?"#00b894":"#c8a060",fontFamily:"sans-serif",fontWeight:600}}>{d.photo?"✓ Photo uploaded — tap to change":"📸 Tap to Upload Photo"}</div>
+              <div style={{fontSize:13,color:d.photo?"#00b894":"#c8a060",fontFamily:"sans-serif",fontWeight:600}}>{d.photo?"✓ Photo uploaded - tap to change":"📸 Tap to Upload Photo"}</div>
               <div style={{fontSize:11,color:"#636e72",fontFamily:"sans-serif",marginTop:3}}>JPG, PNG · Max 5MB · Min 300×300px</div>
             </div>
             <input ref={fileRef} type="file" accept="image/*" onChange={e=>handlePhoto(e.target.files[0])}/>
             <div style={{...cd,background:"rgba(0,184,148,.06)",border:"1px solid rgba(0,184,148,.18)",marginBottom:13}}>
               <div style={{fontSize:12,color:"#00b894",fontFamily:"sans-serif",fontWeight:600,marginBottom:6}}>📋 Photo Guidelines</div>
-              {[["✅","Clear headshot — face fully visible"],["✅","Good lighting, plain or simple background"],["✅","Traditional attire preferred (saffron, white)"],["❌","No sunglasses, heavy filters, or group photos"]].map(([ic,t])=>(
+              {[["✅","Clear headshot - face fully visible"],["✅","Good lighting, plain or simple background"],["✅","Traditional attire preferred (saffron, white)"],["❌","No sunglasses, heavy filters, or group photos"]].map(([ic,t])=>(
                 <div key={t} style={{display:"flex",gap:7,marginBottom:4}}><span style={{fontSize:11,flexShrink:0}}>{ic}</span><div style={{fontSize:11,color:"#c8b090",fontFamily:"sans-serif",lineHeight:1.4}}>{t}</div></div>
               ))}
             </div>
@@ -648,7 +646,7 @@ function Onboard({onDone}){
               <Err m={errs.specs}/>
             </div>
             <div style={{marginBottom:12}}>
-              <label style={lbl}>LANGUAGES * {d.country&&<span style={{color:"#a29bfe",fontSize:9,letterSpacing:0}}>— showing {d.country} languages first</span>}</label>
+              <label style={lbl}>LANGUAGES * {d.country&&<span style={{color:"#a29bfe",fontSize:9,letterSpacing:0}}>- showing {d.country} languages first</span>}</label>
               <div ref={langRef} style={{position:"relative",marginBottom:7}}>
                 <div style={{position:"relative"}}>
                   <input
@@ -660,7 +658,7 @@ function Onboard({onDone}){
                   />
                   <span style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",cursor:"pointer",color:"#8a7a6a",fontSize:12,pointerEvents:"none"}}>{langOpen?"▲":"▼"}</span>
                 </div>
-                {/* Floating dropdown — only when open */}
+                {/* Floating dropdown - only when open */}
                 {langOpen&&(
                   <div style={{position:"absolute",top:"calc(100% + 4px)",left:0,right:0,background:"#0a0818",border:"1px solid rgba(200,150,50,.35)",borderRadius:11,maxHeight:220,overflowY:"auto",zIndex:200,boxShadow:"0 8px 32px rgba(0,0,0,.7)"}}>
                 {getLangsForCountry(d.country)
@@ -683,7 +681,7 @@ function Onboard({onDone}){
                   </div>
                 )}
               </div>
-              {/* Selected chips — shown below input always */}
+              {/* Selected chips - shown below input always */}
               {d.langs.length>0&&(
                 <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:8}}>
                   {d.langs.map(l=>(
@@ -741,7 +739,7 @@ function Onboard({onDone}){
               ))}
             </div>
             <div style={{display:"flex",gap:7,marginBottom:11}}>
-              {[["Beginner","₹10–25",15,20],["Mid-level","₹25–50",30,40],["Expert","₹50–200",75,100]].map(([l,r,c,ca])=>(
+              {[["Beginner","₹10-25",15,20],["Mid-level","₹25-50",30,40],["Expert","₹50-200",75,100]].map(([l,r,c,ca])=>(
                 <div key={l} onClick={()=>{setF("rateChat",String(c));setF("rateCall",String(ca));}} style={{flex:1,background:"rgba(0,184,148,.08)",border:"1px solid rgba(0,184,148,.2)",borderRadius:9,padding:"8px 5px",textAlign:"center",cursor:"pointer"}}>
                   <div style={{fontSize:11,fontWeight:700,color:"#00b894",fontFamily:"sans-serif"}}>{l}</div>
                   <div style={{fontSize:10,color:"#8a7a6a",fontFamily:"sans-serif"}}>{r}/min</div>
@@ -823,7 +821,7 @@ function Onboard({onDone}){
                   <Err m={errs.accountNum}/>
                 </div>
 
-                {/* ── INDIA ── */}
+                {/* -- INDIA -- */}
                 {(d.bankCountry||d.country)==="India"&&(
                   <div>
                     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9,marginBottom:11}}>
@@ -849,13 +847,13 @@ function Onboard({onDone}){
                     <div style={{marginBottom:11}}>
                       <label style={lbl}>PAN NUMBER *</label>
                       <input value={d.panNum||""} onChange={e=>setF("panNum",e.target.value.toUpperCase().slice(0,10))} placeholder="e.g. ABCDE1234F" style={{...ip,fontFamily:"monospace",letterSpacing:2,border:"1px solid "+(errs.panNum?"rgba(255,71,87,.4)":"rgba(200,150,50,.28)")}}/>
-                      <div style={{fontSize:10,color:"#636e72",fontFamily:"sans-serif",marginTop:3}}>Required for tax compliance — payments above ₹50,000/year</div>
+                      <div style={{fontSize:10,color:"#636e72",fontFamily:"sans-serif",marginTop:3}}>Required for tax compliance - payments above ₹50,000/year</div>
                       <Err m={errs.panNum}/>
                     </div>
                   </div>
                 )}
 
-                {/* ── AUSTRALIA ── */}
+                {/* -- AUSTRALIA -- */}
                 {(d.bankCountry||d.country)==="Australia"&&(
                   <div>
                     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9,marginBottom:11}}>
@@ -881,7 +879,7 @@ function Onboard({onDone}){
                   </div>
                 )}
 
-                {/* ── UNITED KINGDOM ── */}
+                {/* -- UNITED KINGDOM -- */}
                 {(d.bankCountry||d.country)==="United Kingdom"&&(
                   <div>
                     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9,marginBottom:11}}>
@@ -903,7 +901,7 @@ function Onboard({onDone}){
                   </div>
                 )}
 
-                {/* ── UNITED STATES ── */}
+                {/* -- UNITED STATES -- */}
                 {(d.bankCountry||d.country)==="United States"&&(
                   <div>
                     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9,marginBottom:11}}>
@@ -929,7 +927,7 @@ function Onboard({onDone}){
                   </div>
                 )}
 
-                {/* ── CANADA ── */}
+                {/* -- CANADA -- */}
                 {(d.bankCountry||d.country)==="Canada"&&(
                   <div>
                     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:9,marginBottom:11}}>
@@ -949,7 +947,7 @@ function Onboard({onDone}){
                   </div>
                 )}
 
-                {/* ── SINGAPORE / UAE / NEW ZEALAND ── */}
+                {/* -- SINGAPORE / UAE / NEW ZEALAND -- */}
                 {["Singapore","UAE","New Zealand"].includes(d.bankCountry||d.country)&&(
                   <div>
                     <div style={{marginBottom:11}}>
@@ -966,7 +964,7 @@ function Onboard({onDone}){
                   </div>
                 )}
 
-                {/* ── GERMANY / FRANCE / EU ── */}
+                {/* -- GERMANY / FRANCE / EU -- */}
                 {["Germany","France"].includes(d.bankCountry||d.country)&&(
                   <div>
                     <div style={{marginBottom:11}}>
@@ -987,7 +985,7 @@ function Onboard({onDone}){
                   </div>
                 )}
 
-                {/* ── OTHER COUNTRIES ── */}
+                {/* -- OTHER COUNTRIES -- */}
                 {(d.bankCountry||d.country)==="Other"&&(
                   <div>
                     <div style={{marginBottom:11}}>
@@ -1047,14 +1045,14 @@ function Onboard({onDone}){
                 :<img src={avUrl(d.name||"p",d.gender)} style={{width:70,height:70,borderRadius:"50%",border:"3px solid rgba(255,215,0,.25)",display:"block",margin:"0 auto 9px",opacity:.75}} alt=""/>
               }
               <div style={{fontSize:14,fontWeight:700,color:"#e8d5b7"}}>{d.name||"Your Name"}</div>
-              <div style={{fontSize:11,color:"#c8a060",fontFamily:"sans-serif",marginTop:2,marginBottom:7}}>{d.specs.slice(0,2).join(" · ")||"Astrologer"} · {d.exp||"—"}</div>
+              <div style={{fontSize:11,color:"#c8a060",fontFamily:"sans-serif",marginTop:2,marginBottom:7}}>{d.specs.slice(0,2).join(" · ")||"Astrologer"} · {d.exp||"-"}</div>
               <div style={{display:"flex",justifyContent:"center",gap:6,flexWrap:"wrap"}}>
-                {["💬 ₹"+(d.rateChat||"—")+"/min","📞 ₹"+(d.rateCall||"—")+"/min",(d.langs[0]||"—")].map(v=>(
+                {["💬 ₹"+(d.rateChat||"-")+"/min","📞 ₹"+(d.rateCall||"-")+"/min",(d.langs[0]||"-")].map(v=>(
                   <div key={v} style={{fontSize:10,fontFamily:"sans-serif",color:"#8a7a6a",background:"rgba(255,255,255,.05)",padding:"3px 8px",borderRadius:8}}>{v}</div>
                 ))}
               </div>
             </div>
-            {[["👤 Account",[["Name",d.name],["Email",d.email],["Phone",d.phone],["Address",(d.addr1?d.addr1+", ":"")+( d.city?d.city+", ":"")+( d.country||"")],["Postcode",d.postcode||"—"]]],["📸 Photo",[["Profile Photo",d.photo?"Uploaded ✓":"Not uploaded (avatar used)"]]],["⭐ Expertise",[["Specialities",d.specs.join(", ")||"—"],["Languages",d.langs.join(", ")||"—"],["Experience",d.exp||"—"]]],["💰 Rates",[["Chat","₹"+(d.rateChat||"—")+"/min"],["Call","₹"+(d.rateCall||"—")+"/min"],["Working Days",d.days.join(", ")||"—"],["Free First Min",d.freeFirst?"Yes ✓":"No"]]],["🏦 Banking",[["Account Name",d.accountName||"—"],["Bank",d.bankName||"—"],["Account No","****"+(d.accountNum?d.accountNum.slice(-4):"—")],["Country",d.bankCountry||d.country||"—"],(d.ifsc?["IFSC",d.ifsc]:null),(d.bsb?["BSB",d.bsb]:null),(d.sortCode?["Sort Code",d.sortCode]:null),(d.routingNum?["Routing No",d.routingNum]:null),(d.iban?["IBAN","****"+d.iban.slice(-4)]:null),(d.swiftBic?["SWIFT/BIC",d.swiftBic]:null)].filter(Boolean)]].map(([title,items])=>(
+            {[["👤 Account",[["Name",d.name],["Email",d.email],["Phone",d.phone],["Address",(d.addr1?d.addr1+", ":"")+( d.city?d.city+", ":"")+( d.country||"")],["Postcode",d.postcode||"-"]]],["📸 Photo",[["Profile Photo",d.photo?"Uploaded ✓":"Not uploaded (avatar used)"]]],["⭐ Expertise",[["Specialities",d.specs.join(", ")||"-"],["Languages",d.langs.join(", ")||"-"],["Experience",d.exp||"-"]]],["💰 Rates",[["Chat","₹"+(d.rateChat||"-")+"/min"],["Call","₹"+(d.rateCall||"-")+"/min"],["Working Days",d.days.join(", ")||"-"],["Free First Min",d.freeFirst?"Yes ✓":"No"]]],["🏦 Banking",[["Account Name",d.accountName||"-"],["Bank",d.bankName||"-"],["Account No","****"+(d.accountNum?d.accountNum.slice(-4):"-")],["Country",d.bankCountry||d.country||"-"],(d.ifsc?["IFSC",d.ifsc]:null),(d.bsb?["BSB",d.bsb]:null),(d.sortCode?["Sort Code",d.sortCode]:null),(d.routingNum?["Routing No",d.routingNum]:null),(d.iban?["IBAN","****"+d.iban.slice(-4)]:null),(d.swiftBic?["SWIFT/BIC",d.swiftBic]:null)].filter(Boolean)]].map(([title,items])=>(
               <div key={title} style={{...cd,marginBottom:9}}>
                 <div style={{fontSize:12,fontWeight:700,color:G,marginBottom:8,fontFamily:"sans-serif"}}>{title}</div>
                 {items.map(([k,v])=>(
@@ -1067,7 +1065,7 @@ function Onboard({onDone}){
             ))}
             <div style={{...cd,background:"rgba(255,215,0,.06)",border:"1px solid rgba(255,215,0,.2)",marginBottom:13}}>
               <div style={{fontSize:12,fontWeight:700,color:G,marginBottom:8}}>📋 What happens next?</div>
-              {[["1","Profile reviewed in 24–48 hours"],["2","Verification call if needed"],["3","Approved → profile live to customers"],["4","Start earning immediately!"]].map(([n,t])=>(
+              {[["1","Profile reviewed in 24-48 hours"],["2","Verification call if needed"],["3","Approved → profile live to customers"],["4","Start earning immediately!"]].map(([n,t])=>(
                 <div key={n} style={{display:"flex",gap:8,marginBottom:6}}>
                   <div style={{width:17,height:17,borderRadius:"50%",background:"rgba(255,215,0,.15)",border:"1px solid rgba(255,215,0,.3)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,color:G,fontFamily:"sans-serif",fontWeight:700,flexShrink:0}}>{n}</div>
                   <div style={{fontSize:12,color:"#c8b090",fontFamily:"sans-serif",lineHeight:1.5}}>{t}</div>
@@ -1090,7 +1088,7 @@ function Onboard({onDone}){
               <div style={{fontSize:36,marginBottom:8}}>📱</div>
               <div style={{fontSize:18,fontWeight:700,color:G,marginBottom:4}}>Verify Your Phone</div>
               <div style={{fontSize:12,color:"#8a7a6a",fontFamily:"sans-serif",lineHeight:1.6}}>A 6-digit code has been sent to<br/><strong style={{color:"#e8d5b7"}}>{d.phone}</strong></div>
-              <div style={{fontSize:10,color:"#a29bfe",fontFamily:"sans-serif",marginTop:6,background:"rgba(162,155,254,.08)",padding:"4px 10px",borderRadius:8,display:"inline-block"}}>Demo mode — check browser console for OTP</div>
+              <div style={{fontSize:10,color:"#a29bfe",fontFamily:"sans-serif",marginTop:6,background:"rgba(162,155,254,.08)",padding:"4px 10px",borderRadius:8,display:"inline-block"}}>Demo mode - check browser console for OTP</div>
             </div>
             <div style={{marginBottom:14}}>
               <div style={{fontSize:11,color:"#c8a060",fontFamily:"sans-serif",letterSpacing:1.2,marginBottom:6}}>ENTER 6-DIGIT CODE</div>
@@ -1112,20 +1110,20 @@ function Onboard({onDone}){
   );
 }
 
-// ── PENDING ───────────────────────────────────────────────────────
+// -- PENDING -------------------------------------------------------
 function Pending({d,onDashboard}){
   return(
-    <div style={{minHeight:"100vh",background:BG,fontFamily:"'Playfair Display',Georgia,serif",color:"#e8d5b7",position:"relative"}}>
+    <div style={{minHeight:"100vh",background:BG,fontFamily:"Georgia,serif",color:"#e8d5b7",position:"relative"}}>
       <style>{CSS}</style><Stars/>
       <div style={{position:"relative",zIndex:1,maxWidth:440,margin:"0 auto",padding:"28px 16px 40px",animation:"floatIn .4s ease"}}>
         <div style={{textAlign:"center",marginBottom:20}}>
           <div style={{width:74,height:74,borderRadius:"50%",background:"rgba(0,184,148,.12)",border:"3px solid #00b894",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 14px",fontSize:32,animation:"tick .5s ease"}}>✓</div>
           <div style={{fontSize:19,fontWeight:700,color:"#00b894",marginBottom:4}}>Profile Submitted!</div>
-          <div style={{fontSize:12,color:"#8a7a6a",fontFamily:"sans-serif",lineHeight:1.7}}>Welcome, <strong style={{color:"#c8a060"}}>{d?.name?.split(" ")[0]||"Astrologer"}</strong>!<br/>Your profile is under review (24–48 hrs).</div>
+          <div style={{fontSize:12,color:"#8a7a6a",fontFamily:"sans-serif",lineHeight:1.7}}>Welcome, <strong style={{color:"#c8a060"}}>{d?.name?.split(" ")[0]||"Astrologer"}</strong>!<br/>Your profile is under review (24-48 hrs).</div>
         </div>
         <div style={{...cd,background:"linear-gradient(135deg,rgba(255,215,0,.08),rgba(10,0,21,.9))",border:"1px solid rgba(255,215,0,.25)"}}>
           <div style={{fontSize:13,fontWeight:700,color:G,marginBottom:14}}>📋 Application Status</div>
-          {[["Profile Submitted",true,false,"Just now"],["Admin Review",false,true,"24–48 hrs"],["Verification Call",false,false,"If needed"],["Profile Goes Live!",false,false,"After approval"]].map(([label,done,active,time],i,arr)=>(
+          {[["Profile Submitted",true,false,"Just now"],["Admin Review",false,true,"24-48 hrs"],["Verification Call",false,false,"If needed"],["Profile Goes Live!",false,false,"After approval"]].map(([label,done,active,time],i,arr)=>(
             <div key={i} style={{display:"flex",gap:10,marginBottom:i<arr.length-1?13:0,alignItems:"flex-start"}}>
               <div style={{display:"flex",flexDirection:"column",alignItems:"center",flexShrink:0}}>
                 <div style={{width:25,height:25,borderRadius:"50%",background:done?"rgba(0,184,148,.2)":active?"rgba(255,215,0,.15)":"rgba(255,255,255,.06)",border:"2px solid "+(done?"#00b894":active?G:"rgba(200,150,50,.2)"),display:"flex",alignItems:"center",justifyContent:"center",fontSize:11}}>
@@ -1151,10 +1149,31 @@ function Pending({d,onDashboard}){
   );
 }
 
-// ── DASHBOARD ─────────────────────────────────────────────────────
+// -- DASHBOARD -----------------------------------------------------
 function Dashboard({d}){
+  const [showReport,setShowReport]=React.useState(false);
+  const [reportCustomer,setReportCustomer]=React.useState("");
+  const [reportReason,setReportReason]=React.useState("");
+  const [reportDetails,setReportDetails]=React.useState("");
+  const [reportSent,setReportSent]=React.useState(false);
+
+  const RECENT=[
+    {name:"Priya R.",time:"Today 2:30 PM",duration:"24 min",coins:"600",rating:5},
+    {name:"Ravi S.",time:"Today 10:15 AM",duration:"18 min",coins:"450",rating:4},
+    {name:"James M.",time:"Yesterday 6:45 PM",duration:"31 min",coins:"775",rating:5},
+    {name:"Wei C.",time:"Yesterday 3:20 PM",duration:"12 min",coins:"300",rating:2},
+  ];
+
+  function openReport(customerName){
+    setReportCustomer(customerName);
+    setReportReason("");
+    setReportDetails("");
+    setReportSent(false);
+    setShowReport(true);
+  }
+
   return(
-    <div style={{minHeight:"100vh",background:BG,fontFamily:"'Playfair Display',Georgia,serif",color:"#e8d5b7",position:"relative"}}>
+    <div style={{minHeight:"100vh",background:BG,fontFamily:"Georgia,serif",color:"#e8d5b7",position:"relative"}}>
       <style>{CSS}</style><Stars/>
       <div style={{position:"sticky",top:0,zIndex:100,background:"rgba(10,0,21,.93)",backdropFilter:"blur(20px)",borderBottom:"1px solid rgba(200,150,50,.2)",padding:"0 16px",display:"flex",alignItems:"center",justifyContent:"space-between",height:58}}>
         <div style={{fontSize:16,fontWeight:700,background:"linear-gradient(90deg,#e8d5b7,#ffd700,#a29bfe)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>🔮 Astrologer Dashboard</div>
@@ -1165,11 +1184,11 @@ function Dashboard({d}){
           <div style={{fontSize:26}}>⏳</div>
           <div>
             <div style={{fontSize:14,fontWeight:700,color:"#fdcb6e"}}>Profile Under Review</div>
-            <div style={{fontSize:11,color:"#8a7a6a",fontFamily:"sans-serif",lineHeight:1.6,marginTop:2}}>Our team will review within 24–48 hours. You'll receive an email once approved and your profile goes live to customers.</div>
+            <div style={{fontSize:11,color:"#8a7a6a",fontFamily:"sans-serif",lineHeight:1.6,marginTop:2}}>Our team will review within 24-48 hours. You'll receive an email once approved and your profile goes live to customers.</div>
           </div>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:9,marginBottom:14}}>
-          {[["🪙","₹0","Today"],["💬","0","Sessions"],["⭐","—","Rating"]].map(([ic,v,l])=>(
+          {[["🪙","₹0","Today"],["💬","0","Sessions"],["⭐","-","Rating"]].map(([ic,v,l])=>(
             <div key={l} style={{...cd,textAlign:"center",padding:"11px 6px",marginBottom:0}}>
               <div style={{fontSize:17,marginBottom:3}}>{ic}</div>
               <div style={{fontSize:14,fontWeight:700,color:G,fontFamily:"sans-serif"}}>{v}</div>
@@ -1177,7 +1196,89 @@ function Dashboard({d}){
             </div>
           ))}
         </div>
-        <div style={{fontSize:14,fontWeight:700,color:G,marginBottom:10}}>Features Unlocked After Approval</div>
+        {/* Recent Sessions with Report button */}
+        <div style={{fontSize:14,fontWeight:700,color:G,marginBottom:10}}>Recent Sessions</div>
+        {RECENT.map((s,i)=>(
+          <div key={i} style={{...cd,marginBottom:9}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+              <div style={{display:"flex",alignItems:"center",gap:10}}>
+                <div style={{width:36,height:36,borderRadius:"50%",background:"linear-gradient(135deg,#6c5ce7,#a29bfe)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,fontWeight:700,color:"#fff",fontFamily:"sans-serif",flexShrink:0}}>{s.name[0]}</div>
+                <div>
+                  <div style={{fontSize:13,fontWeight:700,color:"#e8d5b7",fontFamily:"sans-serif"}}>{s.name}</div>
+                  <div style={{fontSize:10,color:"#8a7a6a",fontFamily:"sans-serif",marginTop:1}}>{s.time} · {s.duration}</div>
+                  <div style={{display:"flex",gap:8,marginTop:2}}>
+                    <span style={{fontSize:10,color:G,fontFamily:"sans-serif"}}>🪙 {s.coins}</span>
+                    <span style={{fontSize:10,fontFamily:"sans-serif",color:s.rating>=4?"#ffd700":s.rating===3?"#fdcb6e":"#ff7675"}}>{"⭐".repeat(s.rating)}</span>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={()=>openReport(s.name)}
+                style={{background:"rgba(255,71,87,.08)",border:"1px solid rgba(255,71,87,.2)",borderRadius:8,padding:"5px 10px",color:"#ff8a80",fontFamily:"sans-serif",fontSize:11,cursor:"pointer",flexShrink:0}}
+              >
+                &#9888; Report
+              </button>
+            </div>
+          </div>
+        ))}
+
+        {/* Report Customer Modal */}
+        {showReport&&(
+          <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.88)",zIndex:500,display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
+            <div style={{background:"linear-gradient(180deg,#0f0025,#080618)",border:"1px solid rgba(255,71,87,.25)",borderRadius:"20px 20px 0 0",padding:"22px 18px 36px",width:"100%",maxWidth:480,animation:"slideUp .35s ease"}}>
+              {!reportSent?(
+                <div>
+                  <div style={{textAlign:"center",marginBottom:16}}>
+                    <div style={{fontSize:24,marginBottom:6}}>&#9888;</div>
+                    <div style={{fontSize:16,fontWeight:700,color:"#ff8a80",marginBottom:4}}>Report Customer</div>
+                    <div style={{fontSize:12,color:"#c8a060",fontFamily:"sans-serif",marginBottom:2}}>Reporting: <strong style={{color:"#e8d5b7"}}>{reportCustomer}</strong></div>
+                    <div style={{fontSize:11,color:"#8a7a6a",fontFamily:"sans-serif"}}>This report will be sent to MiraXAstro admin for review</div>
+                  </div>
+                  <div style={{marginBottom:12}}>
+                    <div style={{fontSize:11,color:"#c8a060",fontFamily:"sans-serif",letterSpacing:1,marginBottom:8}}>REASON FOR REPORT *</div>
+                    <div style={{display:"flex",flexWrap:"wrap",gap:7,marginBottom:12}}>
+                      {["Abusive language","Inappropriate behaviour","Threatening comments","Spam or fake details","Refused to pay","Other"].map(r=>(
+                        <div key={r} onClick={()=>setReportReason(r)}
+                          style={{padding:"6px 12px",borderRadius:16,border:"1px solid",borderColor:reportReason===r?"rgba(255,71,87,.6)":"rgba(200,150,50,.2)",background:reportReason===r?"rgba(255,71,87,.12)":"transparent",fontSize:11,fontFamily:"sans-serif",color:reportReason===r?"#ff8a80":"#8a7a6a",cursor:"pointer"}}>
+                          {r}
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{fontSize:11,color:"#c8a060",fontFamily:"sans-serif",letterSpacing:1,marginBottom:6}}>ADDITIONAL DETAILS</div>
+                    <textarea
+                      value={reportDetails}
+                      onChange={e=>setReportDetails(e.target.value)}
+                      placeholder="Describe what happened in detail (optional)..."
+                      rows={3}
+                      style={{width:"100%",background:"#0d0a1a",border:"1px solid rgba(200,150,50,.25)",borderRadius:11,padding:"10px 12px",color:"#e8d5b7",fontFamily:"sans-serif",fontSize:12,outline:"none",resize:"none",boxSizing:"border-box"}}
+                    />
+                  </div>
+                  <div style={{display:"flex",gap:8}}>
+                    <button onClick={()=>setShowReport(false)} style={{flex:1,background:"transparent",border:"1px solid rgba(200,150,50,.2)",borderRadius:10,padding:"10px",color:"#8a7a6a",fontFamily:"sans-serif",fontSize:12,cursor:"pointer"}}>Cancel</button>
+                    <button
+                      disabled={!reportReason}
+                      onClick={()=>{if(reportReason)setReportSent(true);}}
+                      style={{flex:2,background:reportReason?"linear-gradient(135deg,#c0392b,#e74c3c)":"rgba(100,100,100,.2)",color:reportReason?"white":"#636e72",border:"none",borderRadius:10,padding:"10px",fontWeight:700,fontFamily:"sans-serif",fontSize:12,cursor:reportReason?"pointer":"not-allowed"}}
+                    >
+                      Submit Report
+                    </button>
+                  </div>
+                </div>
+              ):(
+                <div style={{textAlign:"center",padding:"20px 0"}}>
+                  <div style={{fontSize:40,marginBottom:12}}>&#10003;</div>
+                  <div style={{fontSize:16,fontWeight:700,color:"#00b894",marginBottom:8}}>Report Submitted!</div>
+                  <div style={{fontSize:12,color:"#8a7a6a",fontFamily:"sans-serif",lineHeight:1.7,marginBottom:18}}>
+                    Your report about <strong style={{color:"#e8d5b7"}}>{reportCustomer}</strong> has been sent to MiraXAstro admin.<br/>We will review it within 24 hours and take appropriate action.
+                  </div>
+                  <button onClick={()=>setShowReport(false)} style={{...bG,padding:"10px 28px"}}>Close</button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        <div style={{fontSize:14,fontWeight:700,color:G,marginBottom:10,marginTop:6}}>Features Unlocked After Approval</div>
         {[["💬","Live Chat &amp; Call","Accept consultations from customers in real time"],["💰","Earnings &amp; Payouts","Track earnings, request withdrawals to your bank"],["📅","Session Bookings","Manage your upcoming scheduled sessions"],["⭐","Reviews &amp; Ratings","View and respond to customer feedback"],["📈","Analytics","Profile views, conversion rate, peak hours"]].map(([ic,t,desc])=>(
           <div key={t} style={{...cd,display:"flex",gap:11,alignItems:"flex-start",opacity:.5}}>
             <div style={{fontSize:20,flexShrink:0}}>{ic}</div>
@@ -1193,7 +1294,7 @@ function Dashboard({d}){
   );
 }
 
-// ── ROOT ──────────────────────────────────────────────────────────
+// -- ROOT ----------------------------------------------------------
 export default function App(){
   const [view,setView]=useState("land");
   const [astroData,setAstroData]=useState(null);
